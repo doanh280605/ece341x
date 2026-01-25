@@ -18,7 +18,10 @@ total_memory_gb: 23.598876953125
 
 **Screenshots saved:**
 - `screenshots/s1_nvidia_smi.png`
+<img width="627" height="285" alt="image" src="https://github.com/user-attachments/assets/2942e0bc-143f-4540-bb7e-42865efaa784" />
+
 - `screenshots/s1_gpu_info.png`
+<img width="626" height="441" alt="image" src="https://github.com/user-attachments/assets/3ef4fcc6-d451-4e95-a118-44f818040225" />
 
 ---
 
