@@ -83,16 +83,24 @@ Edit `scripts/slurm_interactive.sh` if needed for your cluster (partition/QOS/ac
 
 ```bash
 bash scripts/slurm_interactive.sh
+# requests an interactive SLURM job. You get a GPU + shell. needed becauses GPU aren't available on login nodes
+# SLURM is a cluster scheduler. Manages who get CPUs, GPUs, memory and time. 
 ```
 
 Inside the allocated node:
 ```bash
 module load cuda  # if your cluster uses modules
+# add CUDA toolkit + NVIDIA libs to your PATH
+# run GPU Code (PyTorch, CUDA kernels)
 module load gcc
+# load a compatible C compiler
+# compile python extensions, PyTorch ops, native libs. 
 
 # Create environment (one-time)
 conda env create -f env.yml
+# create an isolated Python environment with exact dependencies. 
 conda activate ece341x-lab1
+# switch shell to that environment. 
 
 # Sanity checks
 nvidia-smi
@@ -114,6 +122,9 @@ Run:
 ```bash
 python python/bench_matmul.py --gpu-info-only
 ```
+# bench_matmul: benchmarking tool that measures the performance of GPU matrix multiplication operations across different 
+# data types (fp32, fp16, bf16, int8)
+# it benchmarks computation time, memory usage, power consumption, and calculate performances metrics 
 
 Save:
 - A screenshot of `nvidia-smi` to `screenshots/s1_nvidia_smi.png`

@@ -1,10 +1,20 @@
 # Session 1 Answers (fill in)
 
 ## 1) GPU info (current state)
-1. GPU model + memory:
-2. CUDA driver/runtime versions (from `nvidia-smi` and/or PyTorch):
-3. Current GPU utilization / processes you see:
+1. GPU model + memory: NVIDIA A30, 24GB
+2. CUDA driver/runtime versions (from `nvidia-smi` and/or PyTorch): 570.133.07, CUDA 12.8, PyTorch use CUDA 12.1
+3. Current GPU utilization / processes you see: 0% utilization, no running process. 4MiB memory used, power 29W
 4. Paste (or summarize) output from `python python/bench_matmul.py --gpu-info-only`:
+cuda_version: 12.1
+device_name: NVIDIA A30
+gpu_utilization_percent: 0.0
+memory_total_mb: 24576.0
+memory_used_mb: 4.0
+memory_utilization_percent: 0.0
+nvidia_smi_full: shows NVIDIA A30, 29W / 165W, 4MiB / 24576MiB, 0% util
+power_draw_watts: 29.14
+torch_version: 2.5.1
+total_memory_gb: 23.598876953125
 
 **Screenshots saved:**
 - `screenshots/s1_nvidia_smi.png`
