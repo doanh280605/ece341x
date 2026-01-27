@@ -23,6 +23,15 @@ total_memory_gb: 23.598876953125
 - `screenshots/s1_gpu_info.png`
 <img width="626" height="441" alt="image" src="https://github.com/user-attachments/assets/3ef4fcc6-d451-4e95-a118-44f818040225" />
 
+- `screenshots/s1_matmul_fp32.png`
+<img width="1030" height="679" alt="image" src="https://github.com/user-attachments/assets/b20bbcc5-6aea-4360-8ad8-944c2ee6ab2d" />
+
+- `screenshots/s1_matmul_fp16.png`
+<img width="1027" height="666" alt="image" src="https://github.com/user-attachments/assets/92528ca9-9070-4f8d-aee6-4ae4125e3272" />
+
+- `screenshots/s1_matmul_bf16.png`
+<img width="1032" height="660" alt="image" src="https://github.com/user-attachments/assets/d095f187-7c41-4708-9170-ffe4526e4197" />
+
 ---
 
 ## 2) Why PyTorch tensors (vs “lumpy arrays”)
