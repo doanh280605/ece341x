@@ -60,9 +60,9 @@ def time_gpu(fn: Callable[[], Any], trials: int = 50, warmup: int = 10) -> Timin
 
     torch.cuda.synchronize() # wait for all pending GPU works to finish 
 
-    for _ i range(trials): 
-        t0 = time.perf_counter() # get current time 
+    for _ in range(trials): 
         torch.cuda.synchronize() # ensure all previous GPU works are done
+        t0 = time.perf_counter() # get current time 
         fn() # call the function 
         torch.cuda.synchronize() # ensure all GPU works are done
         t1 = time.perf_counter() # get current time after function call

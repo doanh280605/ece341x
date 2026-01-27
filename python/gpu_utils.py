@@ -38,7 +38,8 @@ def _run(cmd: str) -> str:
 
 def _nvml_ensure_init(device_index: int = 0) -> None:
     """
-    Initialize NVML once and cache a handle.
+    Initialize NVML once and grab a GPU handle, set a baseline time and energy so later code can 
+    compute "energy since baseline".
 
     TODO-STUDENT:
       - Call nvmlInit()
@@ -47,8 +48,18 @@ def _nvml_ensure_init(device_index: int = 0) -> None:
     """
     global _NVML_INIT, _HANDLE, _BASELINE_ENERGY_MJ, _BASELINE_TIME_S
 
-    if not _HAS_NVML or _NVML_INIT:
+    if not _HAS_NVML or _NVML_INIT: # do nothing if NVML is not available or already initialized 
         return
+    
+    nvmlInit()
+    _NVML_INIT = True
+    _HANDLE = nvmlDeviceGetHandleByIndex(device_index) # stores GPU handle for later queries
+    _BASELINE_TIME_S = time.time()  # records start time for elapsed calculations
+
+    try: 
+        _BASELINE_ENERGY_MJ = nvmlDeviceGetTotalEnergyConsumption(_HANDLE)
+    except Exception: 
+        _BASELINE_ENERGY_MJ = None
 
     # TODO-STUDENT: initialize NVML and set baselines
     nvmlInit()
@@ -75,6 +86,26 @@ def get_gpu_info(device_index: int = 0) -> Dict[str, Any]:
     Tip: use _run("nvidia-smi ...") and torch.cuda.get_device_properties.
     """
     # TODO-STUDENT: implement
+    info: Dict[str, Any] = {} 
+
+    if torch is not None and torch.cuda.is_available(): 
+        props = torch.cuda.get_device_properties(device_index)
+        info["torch_device_name"] = props.name
+        info["torch_device_total_memory_bytes"] = props.total_memory
+        info["torch_total_memory_gb"] = round(props.total_memory / (1024 ** 3), 3)
+        info["torch_cuda_version"] = torch.version.cuda
+        info["torch_version"] = torch.__version__
+        info["device_capability"] = f"{props.major}.{props.minor}" 
+    else: 
+        info["torch_cuda_available"] = False
+    
+    info["nvidia_smi_query"] = _run(
+        "nvidia-smi --query-gpu=ultilization.gpu,ultilization.memory,memory.used,memory.total,"
+        "power.draw --format=csv,noheader,nounits"
+    )
+
+    info["nvidia_smi_full"] = _run("nvidia-smi")
+
     raise NotImplementedError("Implement get_gpu_info() in python/gpu_utils.py")
 
 
@@ -98,7 +129,8 @@ def get_power_watts(device_index: int = 0) -> Optional[float]:
 
 def get_current_energy(device_index: int = 0, reset_baseline: bool = False) -> Dict[str, Any]:
     """
-    get_current_energy: return energy since the last baseline.
+    get_current_energy: return energy since the last baseline, either from NVML total energy counter (best)
+    or by estimating power x time (fallback).
 
     Preferred: NVML total energy consumption counter (mJ) if supported.
     Fallback: approximate energy = power * time.
@@ -114,6 +146,53 @@ def get_current_energy(device_index: int = 0, reset_baseline: bool = False) -> D
       - optionally power_watts, elapsed_s
     """
     # TODO-STUDENT: implement
+    # _BASELINE_ENERGY_MJ: NVML total energy reading at baseline (MJ)
+    global _BASELINE_ENERGY_MJ, _BASELINE_TIME_S # when we started measuring
+
+    if _HAS_NVML:  
+        _nvml_ensure_init(device_index) # sets up NVML and baseline values once
+
+    # if reset baseline = true or no baseline yet, resets baseline time s and tries to capture
+    # baseline energy mj
+    if reset_baseline or _BASELINE_TIME_S is None: 
+        _BASELINE_TIME_S = time.time()
+        if _HAS_NVML and _HANDLE is not None: 
+            try: 
+                _BASELINE_ENERGY_MJ = nvmlDeviceGetTotalEnergyConsumption(_HANDLE) # HANDLE: NVML device handle
+            except Exception: 
+                _BASELINE_ENERGY_MJ = None
+    
+    # if NVML total energy is available, use it 
+    # reads current total energy from NVML 
+    # computes delta energy = current - baseline
+    # convert mJ -> J and returns it with method nvml total energy mj
+    if _HAS_NVML and _HANDLE is not None and _BASELINE_ENERGY_MJ is not None: 
+        try: 
+            now_mj = nvmlDeviceGetTotalEnergyConsumption(_HANDLE)
+            delta_mj = now_mj - _BASELINE_ENERGY_MJ
+            return {
+                "joules": float(delta_mj) / 1000.0, 
+                "method": "nvml_total_energy_mj",
+            }
+        except Exception: 
+            pass
+    
+    # fallback: power + time
+    # calls get power watts to get instantaneous power
+    # computes elapsed time since baseline 
+    # energy = power * time 
+    # returns it with method
+    power_watts = get_power_watts(device_index)
+    elapsed_s = time.time() - (_BASELINE_TIME_S or time.time())
+    joules = (power_watts * elapsed_s) if power_watts is not None else None
+
+    return {
+        "joules": joules, 
+        "method": "power_times_time_approx", 
+        "power_watts": power_watts, 
+        "elapsed_s": elapsed_s,
+    }
+
     raise NotImplementedError("Implement get_current_energy() in python/gpu_utils.py")
 
 
