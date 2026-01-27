@@ -169,11 +169,13 @@ Fill answers in `answers/session1.md` (Section 2–4).
 ---
 
 ### Task 1.3 — Vector add in CUDA C++
+Compile and run a Cuda C++ program call vecadd, which adds two vectors on the GPU. It's a simple kernel to show 
+how GPU code is written and how memory transfer + kernel launch work. 
 Build and run:
 ```bash
 cd cuda
-make clean && make vecadd
-./vecadd --n 10000000
+make clean && make vecadd # builds the CUDA program into an executable named vecadd using nvcc. 
+./vecadd --n 10000000 # runs it with 10 mil elements to measure performance. 
 ```
 
 Save a screenshot of the output:

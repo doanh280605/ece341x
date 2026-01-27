@@ -42,12 +42,31 @@ Prompt:
 - Why not a Python list-of-lists (“lumpy array”)?
 - Mention: contiguity/strides, dtype, device placement, vectorization/kernels, autograd, and memory transfers.
 
+PyTorch tensors are the right abstraction because tensors are optimized for deep learning with GPU acceleration 
+and automatic differences, while numpy is a general purpose library for CPU-based scientific computing. Built-in 
+support via the Autograd module for gradient calculation. Tensors are typed, contiguous blocks of memory that map 
+directly to efficient CPU/GPU kernels. They carry dtype and stride metadata, which lets the runtime pick vertorized 
+kernels and avoid per-element Python above. Tensors also know their device placement, so the same code can run
+on CPU or GPU and the framework can manage transfers and synchronization correctly. List-of-lists is fragmented 
+across many Python objects, so there is no single contiguous buffer and no consistent stride layout for kernels 
+to use. Lists also lack a uniform dtype, which forces dynamic type checks and blocks low-level vectorization or
+GPU kernel launches.    
+
 ---
 
 ## 3) CPU vs GPU matmul results (include transfer)
 1. At what matrix size `N` does GPU **compute-only** beat CPU?
 2. At what `N` does **end-to-end** GPU (including H2D + D2H) beat CPU?
+
+BF16: GPU wins compute-only and end-to-end at all N 
+FP16: CPU is much slower across all N (CPU min is 17ms vs GPU totals all < 1ms for N and ~3.94 at N = 2048 for end-to-end)
+FP32: GPU compute wins at all N, end-to-end loses to CPU only at N = 256 (CPU 0.112ms vs GPU 0.15ms)
+
 3. When GPU loses, what dominates and why?
+When GPU loses, data transfer and synchronization overhead dominates. For small N, the cost to move inputs to the GPU 
+(H2D), launch kernels, and copy results back (D2H) is larger than the actual compute time, so total GPU time can exceed
+CPU even though GPU compute is faster. For example, fp32 at N=256 has very fast compute but higher gpu_total_ms_median 
+due to transfer overhead. 
 
 Attach references to your CSV rows (e.g., “see results/matmul_fp32.csv, N=512”).
 
@@ -55,15 +74,26 @@ Attach references to your CSV rows (e.g., “see results/matmul_fp32.csv, N=512�
 
 ## 4) Precision (FP32 vs FP16 vs BF16)
 1. Which dtype was fastest on GPU? Did it depend on N?
+Overall, bf16 was the fastest on GPU, while fp32 is the slowest across all N
 2. Any numerical differences? (If you saw warnings, note them.)
+In bf16, for N = 1024, bf16 is slower than fp16 (~0.069ms vs ~0.066ms for compute-only and ~0.93ms vs ~0.9ms for 
+end-to-end)
 3. Hypothesis: why might FP16/BF16 be faster or slower on your GPU?
+Fp16/Bf16 can be faster because they use tensor cores and move half the data, which boosts throughput and reduces
+memory bandwidth pressure. They can be slower if GPU doesn't have strong tensor core support for that dtype.
 
 ---
 
 ## 5) CUDA vecadd
 1. What block size did the program use?
+Default is 256 threads (int block = 256)
+
 2. Why is vector add typically **memory bandwidth** bound?
+Each element does just one add but requries 2 reads + 1 write from global memory, so throughput is limited by 
+memory transfer, not compute. 
+
 3. Compare CPU vs GPU timing for `n=1e7`. What speedup did you observe?
+
 
 **Screenshot saved:**
 - `screenshots/s1_vecadd.png`
