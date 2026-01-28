@@ -93,10 +93,14 @@ Each element does just one add but requries 2 reads + 1 write from global memory
 memory transfer, not compute. 
 
 3. Compare CPU vs GPU timing for `n=1e7`. What speedup did you observe?
-
+CPU time: 7.609ms
+GPU kernel time: 0.158ms
+Speedup: CPU / GPU ~ 48.16x (about 48 times faster on GPU than CPU)
 
 **Screenshot saved:**
 - `screenshots/s1_vecadd.png`
+<img width="586" height="85" alt="image" src="https://github.com/user-attachments/assets/78821d81-990d-4181-8937-3ddb8898e5ff" />
+
 
 
 ## 6) (Optional) Integer / fixed-point experiments
