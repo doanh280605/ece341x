@@ -7,7 +7,7 @@ NVCCFLAGS = -O3 -std=c++17
 # If your cluster needs a specific arch, set it:
 # e.g., for A100: -arch=sm_80
 # ARCH ?= -arch=sm_80
-ARCH ?=
+ARCH ?= -arch=sm_80
 
 all: vecadd matmul_naive
 
