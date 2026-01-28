@@ -94,6 +94,7 @@ int main(int argc, char** argv) {
     float *d_a=nullptr, *d_b=nullptr, *d_c=nullptr;
 
     // TODO-STUDENT: cudaMalloc for each buffer
+    // each input is a vector of length n, so allocate n * sizeof(float)
     CUDA_CHECK(cudaMalloc(&d_a, n * sizeof(float))); // allocate GPU memory for each array 
     CUDA_CHECK(cudaMalloc(&d_b, n * sizeof(float)));
     CUDA_CHECK(cudaMalloc(&d_c, n * sizeof(float)));
@@ -120,7 +121,6 @@ int main(int argc, char** argv) {
     CUDA_CHECK(cudaEventRecord(start)); // start timing
     vecadd_kernel<<<grid, block>>>(d_a, d_b, d_c, n); // timed kernel launch 
     CUDA_CHECK(cudaGetLastError());
-    CUDA_CHECK(cudaDeviceSynchronize());
     CUDA_CHECK(cudaEventRecord(stop)); // end timing
     CUDA_CHECK(cudaEventSynchronize(stop));
     CUDA_CHECK(cudaEventElapsedTime(&ms, start, stop)); // compute elapsed time in ms

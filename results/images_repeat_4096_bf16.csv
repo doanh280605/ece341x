@@ -1,0 +1,2 @@
+repeat,dtype,mode,image_shape,h2d_ms_median,compute_ms_median,d2h_ms_median,total_ms_median,images_per_s_compute,energy_joules,energy_method,FLOPs,MACs,TFLOP_per_s_compute,J_per_image,J_per_MAC,note
+4096,bf16,float,"(3, 224, 224)",345.7470624925918,10.696191787719727,0.5245985012152232,356.96785278152674,382940.02961900964,1651.117,nvml_total_energy_mj,1262720385024,631360192512,118.05326700234811,0.403104736328125,2.615174379985349e-09,"Integer/fixed support varies; if skipped, that is expected and part of the lesson."
