@@ -61,16 +61,6 @@ def _nvml_ensure_init(device_index: int = 0) -> None:
     except Exception: 
         _BASELINE_ENERGY_MJ = None
 
-    # TODO-STUDENT: initialize NVML and set baselines
-    nvmlInit()
-    _NVML_INIT = True
-    _HANDLE = nvmlDeviceGetHandleByIndex(device_index)
-    _BASELINE_TIME_S = time.time()
-    try:
-        _BASELINE_ENERGY_MJ = nvmlDeviceGetTotalEnergyConsumption(_HANDLE)
-    except Exception:
-        _BASELINE_ENERGY_MJ = None
-
 
 def get_gpu_info(device_index: int = 0) -> Dict[str, Any]:
     """
@@ -100,13 +90,12 @@ def get_gpu_info(device_index: int = 0) -> Dict[str, Any]:
         info["torch_cuda_available"] = False
     
     info["nvidia_smi_query"] = _run(
-        "nvidia-smi --query-gpu=ultilization.gpu,ultilization.memory,memory.used,memory.total,"
+        "nvidia-smi --query-gpu=utilization.gpu,utilization.memory,memory.used,memory.total,"
         "power.draw --format=csv,noheader,nounits"
     )
 
     info["nvidia_smi_full"] = _run("nvidia-smi")
-
-    raise NotImplementedError("Implement get_gpu_info() in python/gpu_utils.py")
+    return info
 
 
 def get_power_watts(device_index: int = 0) -> Optional[float]:
