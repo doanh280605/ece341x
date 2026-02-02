@@ -2,19 +2,17 @@
 
 ## 1) GPU info (current state)
 1. GPU model + memory: NVIDIA A30, 24GB
-2. CUDA driver/runtime versions (from `nvidia-smi` and/or PyTorch): 570.133.07, CUDA 12.8, PyTorch use CUDA 12.1
-3. Current GPU utilization / processes you see: 0% utilization, no running process. 4MiB memory used, power 29W
+2. CUDA driver/runtime versions (from `nvidia-smi` and/or PyTorch): 570.133.20, CUDA 12.8, PyTorch uses CUDA 12.1
+3. Current GPU utilization / processes you see: 0% utilization, no running process. 4MiB memory used, power ~29W
 4. Paste (or summarize) output from `python python/bench_matmul.py --gpu-info-only`:
-cuda_version: 12.1
-device_name: NVIDIA A30
-gpu_utilization_percent: 0.0
-memory_total_mb: 24576.0
-memory_used_mb: 4.0
-memory_utilization_percent: 0.0
-nvidia_smi_full: shows NVIDIA A30, 29W / 165W, 4MiB / 24576MiB, 0% util
-power_draw_watts: 29.14
+device_capability: 8.0
+nvidia_smi_full: Mon Feb  2 14:58:11 2026 (NVIDIA A30, 29W / 165W, 4MiB / 24576MiB, 0% util)
+nvidia_smi_query: 0, 0, 4, 24576, 29.36
+torch_cuda_version: 12.1
+torch_device_name: NVIDIA A30
+torch_device_total_memory_bytes: 25339101184
+torch_total_memory_gb: 23.599
 torch_version: 2.5.1
-total_memory_gb: 23.598876953125
 
 **Screenshots saved:**
 - `screenshots/s1_nvidia_smi.png`
@@ -57,9 +55,7 @@ FP32: GPU compute wins at all N, end-to-end loses to CPU only at N = 256 (CPU 0.
 When GPU loses, data transfer and synchronization overhead dominates. For small N, the cost to move inputs to the GPU 
 (H2D), launch kernels, and copy results back (D2H) is larger than the actual compute time, so total GPU time can exceed
 CPU even though GPU compute is faster. For example, fp32 at N=256 has very fast compute but higher gpu_total_ms_median 
-due to transfer overhead. 
-
-Attach references to your CSV rows (e.g., “see results/matmul_fp32.csv, N=512”).
+due to transfer overhead.
 
 ---
 
